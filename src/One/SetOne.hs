@@ -9,7 +9,7 @@ import Data.ByteString.Char8 as Char8
 import qualified Data.ByteString.Internal as I
 import qualified Data.ByteString.Base64 as Base64
 import qualified Data.ByteString.Base16 as Base16
-import Data.Bits (xor)
+import Data.Bits (xor, popCount)
 import Data.Map as M
 import Data.Char
 import Data.Ord
@@ -124,3 +124,8 @@ challenge5 = hspec $ do
   describe "Challenge #5" $ do
     it "Confirm repeatingKeyXor' is functional" $ do
       (repeatingKeyXor' "ICE" poetry) `shouldBe` ch5output
+
+{- Challenge 6: Break repeating-key XOR -}
+hammingDistance :: String -> String -> Int
+hammingDistance s1 s2 = sum $ Data.List.map popCount xored
+  where xored  = B.zipWith xor (Char8.pack s1) (Char8.pack s2)
