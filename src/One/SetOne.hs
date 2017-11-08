@@ -164,7 +164,7 @@ breakCiphertextIntoKeysize xs size
   | B.length xs <= 0 = []
   | otherwise = (B.take size xs) : breakCiphertextIntoKeysize (B.drop size xs) size
 
-challenge6 :: IO [((ByteString, Char), Double)]
+challenge6 :: IO [Char]
 challenge6 = do
   contents <- B.readFile "data/6.txt"
   let bytes = Base64.decodeLenient contents
@@ -176,4 +176,5 @@ challenge6 = do
   let transposed = B.transpose blocks
   let len = Data.List.length transposed
   let xors = Data.List.map findMaxLikelihood transposed
-  return xors
+  let key =  Data.List.map snd $ Data.List.map fst xors
+  return key
