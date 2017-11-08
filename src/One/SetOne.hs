@@ -62,8 +62,8 @@ repeatStr b c = B.replicate (B.length b) (I.c2w c)
 xor' :: ByteString -> Char -> ByteString
 xor' b c = xorStrings b (repeatStr b c)
 
-xorAll :: ByteString -> [ByteString]
-xorAll b = Prelude.map (xor' b) (['0' .. 'z'])
+xorAll :: ByteString -> [(ByteString, Char)]
+xorAll b = Data.List.zip (Prelude.map (xor' b) (['0' .. 'z'])) ['0' .. 'z']
 
 scores :: M.Map Char Double
 scores = M.fromList $ Prelude.zip (Prelude.reverse "etaoin shrdlu") [1,2..]
@@ -76,22 +76,22 @@ scoreLookup c = case M.lookup (toLower c) scores of
 getScore :: [Char] -> Double
 getScore b = sum $ Prelude.map scoreLookup b
 
-getAllScores :: [ByteString] -> [Double]
-getAllScores bs = Prelude.map (getScore . Char8.unpack) bs
+getAllScores :: ByteString -> Double
+getAllScores bs = (getScore . Char8.unpack) bs
 
-findMaxLikelihood :: ByteString -> (ByteString, Double)
-findMaxLikelihood bs = maximumBy (comparing snd) (Prelude.zip xs (getAllScores xs))
+findMaxLikelihood :: ByteString -> ((ByteString, Char), Double)
+findMaxLikelihood bs = maximumBy (comparing snd) (Prelude.zip xs (Prelude.map (getAllScores . fst) xs))
   where xs = xorAll bs
 
 challenge3 :: IO ()
 challenge3 = hspec $ do
   describe "Challenge #3" $ do
     it "Confirm we find: Cooking MC's like a pound of bacon" $ do
-      fst (findMaxLikelihood singleByte) `shouldBe` "Cooking MC's like a pound of bacon"
+      fst (fst (findMaxLikelihood singleByte)) `shouldBe` "Cooking MC's like a pound of bacon"
 
 
 {- Challenge 4: Detect Single Character XOR -}
-challenge4 :: IO (ByteString, Double)
+challenge4 :: IO ((ByteString, Char), Double)
 challenge4 = Prelude.readFile "data/4.txt"
   >>= return
   . maximumBy (comparing snd)
@@ -164,7 +164,7 @@ breakCiphertextIntoKeysize xs size
   | B.length xs <= 0 = []
   | otherwise = (B.take size xs) : breakCiphertextIntoKeysize (B.drop size xs) size
 
-challenge6 :: IO [(ByteString, Double)]
+challenge6 :: IO [((ByteString, Char), Double)]
 challenge6 = do
   contents <- B.readFile "data/6.txt"
   let bytes = Base64.decodeLenient contents
