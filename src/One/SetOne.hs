@@ -129,3 +129,51 @@ challenge5 = hspec $ do
 hammingDistance :: String -> String -> Int
 hammingDistance s1 s2 = sum $ Data.List.map popCount xored
   where xored  = B.zipWith xor (Char8.pack s1) (Char8.pack s2)
+
+challenge6hamming :: IO ()
+challenge6hamming = hspec $ do
+  describe "Challenge #6" $ do
+    it "Confirm hammingDistance is functional" $ do
+      (hammingDistance "this is a test" "wokka wokka!!!") `shouldBe` 37
+
+keySizes :: [Int]
+keySizes = [2 .. 40]
+
+-- For each KEYSIZE, take the first KEYSIZE worth of bytes,
+-- and the second KEYSIZE worth of bytes,
+-- and find the edit distance between them.
+-- Normalize this result by dividing by KEYSIZE.
+normDiffBtwnGulps :: String -> Int -> Int
+normDiffBtwnGulps xs size = (hammingDistance fstGulp sndGulp) `div` size
+  where
+    bitString = Char8.pack xs
+    fstGulp = Char8.unpack (B.take size bitString)
+    rest = B.drop size bitString
+    sndGulp = Char8.unpack (B.take size rest)
+
+normDiffBtwnGulps' :: ByteString -> Int -> Double
+normDiffBtwnGulps' bitString size = (Prelude.fromIntegral (hammingDistance fstGulp sndGulp)) / (Prelude.fromIntegral size)
+  where
+    fstGulp = Char8.unpack (B.take size bitString)
+    rest = B.drop size bitString
+    sndGulp = Char8.unpack (B.take size rest)
+
+
+breakCiphertextIntoKeysize :: ByteString -> Int -> [ByteString]
+breakCiphertextIntoKeysize xs size
+  | B.length xs <= 0 = []
+  | otherwise = (B.take size xs) : breakCiphertextIntoKeysize (B.drop size xs) size
+
+challenge6 :: IO [(ByteString, Double)]
+challenge6 = do
+  contents <- B.readFile "data/6.txt"
+  let bytes = Base64.decodeLenient contents
+  let distances = (Data.List.map (normDiffBtwnGulps' contents) keySizes)
+  let results = Prelude.zip keySizes distances
+  let minDist = sortBy (comparing snd) results
+  let smallest = Prelude.take 4 minDist
+  let blocks = breakCiphertextIntoKeysize bytes (fst (Data.List.head smallest))
+  let transposed = B.transpose blocks
+  let len = Data.List.length transposed
+  let xors = Data.List.map findMaxLikelihood transposed
+  return xors
