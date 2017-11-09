@@ -204,12 +204,15 @@ vigenereFinder bytes size = key
     xors = Data.List.map findMaxLikelihood transposed
     key =  Data.List.map snd $ Data.List.map fst xors
 
-vigenereBreaker :: Int -> IO [[Char]]
-vigenereBreaker n = do
-  contents <- B.readFile "data/6.txt"
+vigenereBreaker :: Int -> String -> IO [[Char]]
+vigenereBreaker n filepath = do
+  contents <- B.readFile filepath -- "data/6.txt"
   let smallest = getNmostLikelyKeysizes contents n
   return (breakRepeatingKeyCipher' contents smallest)
--- *SetOne Data.Ord4> vigenereBreaker 10
+-- *SetOne Data.Ord4> vigenereBreaker 10 "data/6.txt"
 -- ["nnt","in","nonriii","ioitnoonniitieenrnon","riieooiniointsot",
 -- "noitriinonrtitnnioineoenhhre","inrnit","TerminatortX:eBring=theenoise",
 -- "iitiricornitioinioinonnt","nXrireiotitortosieiinoihotiionEnioihnt"]
+
+
+{- Challenge 7: AES in ECB mode -}
