@@ -181,18 +181,35 @@ breakRepeatingKeyCipher contents keySizes = key
     -- breakRepeatingKeyCipher contents keySizes
     -- "nnt"
 
-challenge6 :: IO [Char]
-challenge6 = do
+getNmostLikelyKeysizes :: ByteString -> Int -> [Int]
+getNmostLikelyKeysizes contents n = Prelude.map fst smallest
+  where
+    bytes = Base64.decodeLenient contents
+    distances = (Data.List.map (normDiffBtwnGulps' contents) keySizes)
+    results = Prelude.zip keySizes distances
+    minDist = sortBy (comparing snd) results
+    smallest = Prelude.take n minDist
+
+breakRepeatingKeyCipher' :: ByteString -> [Int] -> [[Char]]
+breakRepeatingKeyCipher' contents nSmallest = Prelude.map (vigenereFinder bytes) nSmallest
+  where
+    bytes = Base64.decodeLenient contents
+
+vigenereFinder :: ByteString -> Int -> [Char]
+vigenereFinder bytes size = key
+  where
+    blocks = breakCiphertextIntoKeysize bytes size
+    transposed = B.transpose blocks
+    len = Data.List.length transposed
+    xors = Data.List.map findMaxLikelihood transposed
+    key =  Data.List.map snd $ Data.List.map fst xors
+
+vigenereBreaker :: Int -> IO [[Char]]
+vigenereBreaker n = do
   contents <- B.readFile "data/6.txt"
-  let bytes = Base64.decodeLenient contents
-  let distances = (Data.List.map (normDiffBtwnGulps' contents) keySizes)
-  let results = Prelude.zip keySizes distances
-  let minDist = sortBy (comparing snd) results
-  let smallest = Prelude.take 10 minDist
-  print $ smallest
-  let blocks = breakCiphertextIntoKeysize bytes (fst (Data.List.head smallest))
-  let transposed = B.transpose blocks
-  let len = Data.List.length transposed
-  let xors = Data.List.map findMaxLikelihood transposed
-  let key =  Data.List.map snd $ Data.List.map fst xors
-  return key
+  let smallest = getNmostLikelyKeysizes contents n
+  return (breakRepeatingKeyCipher' contents smallest)
+-- *SetOne Data.Ord4> vigenereBreaker 10
+-- ["nnt","in","nonriii","ioitnoonniitieenrnon","riieooiniointsot",
+-- "noitriinonrtitnnioineoenhhre","inrnit","TerminatortX:eBring=theenoise",
+-- "iitiricornitioinioinonnt","nXrireiotitortosieiinoihotiionEnioihnt"]
