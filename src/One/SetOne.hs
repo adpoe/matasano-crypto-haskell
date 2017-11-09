@@ -164,6 +164,23 @@ breakCiphertextIntoKeysize xs size
   | B.length xs <= 0 = []
   | otherwise = (B.take size xs) : breakCiphertextIntoKeysize (B.drop size xs) size
 
+
+breakRepeatingKeyCipher :: ByteString -> [Int] -> [Char]
+breakRepeatingKeyCipher contents keySizes = key
+  where
+    bytes = Base64.decodeLenient contents
+    distances = (Data.List.map (normDiffBtwnGulps' contents) keySizes)
+    results = Prelude.zip keySizes distances
+    minDist = sortBy (comparing snd) results
+    smallest = Prelude.take 10 minDist
+    blocks = breakCiphertextIntoKeysize bytes (fst (Data.List.head smallest))
+    transposed = B.transpose blocks
+    len = Data.List.length transposed
+    xors = Data.List.map findMaxLikelihood transposed
+    key =  Data.List.map snd $ Data.List.map fst xors
+    -- breakRepeatingKeyCipher contents keySizes
+    -- "nnt"
+
 challenge6 :: IO [Char]
 challenge6 = do
   contents <- B.readFile "data/6.txt"
@@ -171,7 +188,8 @@ challenge6 = do
   let distances = (Data.List.map (normDiffBtwnGulps' contents) keySizes)
   let results = Prelude.zip keySizes distances
   let minDist = sortBy (comparing snd) results
-  let smallest = Prelude.take 4 minDist
+  let smallest = Prelude.take 10 minDist
+  print $ smallest
   let blocks = breakCiphertextIntoKeysize bytes (fst (Data.List.head smallest))
   let transposed = B.transpose blocks
   let len = Data.List.length transposed
