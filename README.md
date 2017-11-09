@@ -1,8 +1,6 @@
 # matasano crypto
 Working through the Matasano Crypto challenges in Haskell.
 
-# SPOILERS!!!!!
-Warning. There be spoilers below.
 
 
 # SPOILERS!!!!!
