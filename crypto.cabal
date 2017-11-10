@@ -28,4 +28,7 @@ executable crypto
                        containers,
                        tasty,
                        tasty-hunit,
-                       hspec
+                       hspec,
+                       Crypto,
+                       cryptonite,
+                       memory

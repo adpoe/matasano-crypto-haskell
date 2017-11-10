@@ -14,6 +14,9 @@ import Data.Map as M
 import Data.Char
 import Data.Ord
 import Data.List
+import Crypto.Cipher.AES (AES128)
+import Crypto.Cipher.Types (cipherInit, ecbDecrypt)
+import Crypto.Error (throwCryptoError)
 
 {- Challenge 1 -}
 input = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
@@ -216,3 +219,13 @@ vigenereBreaker n filepath = do
 
 
 {- Challenge 7: AES in ECB mode -}
+aesEcbDecrypt :: String -> String -> String
+aesEcbDecrypt key ciphertext = Char8.unpack plaintext
+  where keyBytes = Char8.pack key
+        cipher = throwCryptoError $ cipherInit keyBytes :: AES128
+        plaintext = ecbDecrypt cipher $ Base64.decodeLenient $  Char8.concat $ Char8.lines $ Char8.pack ciphertext
+
+challenge7 :: IO (String)
+challenge7 = do
+  contents <- Prelude.readFile "data/7.txt"
+  return (aesEcbDecrypt "YELLOW SUBMARINE" contents)

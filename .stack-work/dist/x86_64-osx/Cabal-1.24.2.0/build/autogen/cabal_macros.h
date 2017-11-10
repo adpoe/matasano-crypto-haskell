@@ -7,6 +7,13 @@
   (major1) == 0 && (major2) <  1 || \
   (major1) == 0 && (major2) == 1 && (minor) <= 0)
 
+/* package Crypto-4.2.5.1 */
+#define VERSION_Crypto "4.2.5.1"
+#define MIN_VERSION_Crypto(major1,major2,minor) (\
+  (major1) <  4 || \
+  (major1) == 4 && (major2) <  2 || \
+  (major1) == 4 && (major2) == 2 && (minor) <= 5)
+
 /* package aeson-1.1.2.0 */
 #define VERSION_aeson "1.1.2.0"
 #define MIN_VERSION_aeson(major1,major2,minor) (\
@@ -56,6 +63,13 @@
   (major1) == 0 && (major2) <  5 || \
   (major1) == 0 && (major2) == 5 && (minor) <= 7)
 
+/* package cryptonite-0.23 */
+#define VERSION_cryptonite "0.23"
+#define MIN_VERSION_cryptonite(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  23 || \
+  (major1) == 0 && (major2) == 23 && (minor) <= 0)
+
 /* package hex-0.1.2 */
 #define VERSION_hex "0.1.2"
 #define MIN_VERSION_hex(major1,major2,minor) (\
@@ -69,6 +83,13 @@
   (major1) <  2 || \
   (major1) == 2 && (major2) <  4 || \
   (major1) == 2 && (major2) == 4 && (minor) <= 4)
+
+/* package memory-0.14.8 */
+#define VERSION_memory "0.14.8"
+#define MIN_VERSION_memory(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  14 || \
+  (major1) == 0 && (major2) == 14 && (minor) <= 8)
 
 /* package tasty-0.11.3 */
 #define VERSION_tasty "0.11.3"
