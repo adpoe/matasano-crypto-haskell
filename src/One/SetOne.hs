@@ -17,6 +17,12 @@ import Data.List
 import Crypto.Cipher.AES (AES128)
 import Crypto.Cipher.Types (cipherInit, ecbDecrypt)
 import Crypto.Error (throwCryptoError)
+import Data.List.Split
+import qualified Data.Set as S
+import GHC.Word (Word8)
+import qualified Data.ByteString.Base16 as H
+import Numeric (readHex, showHex)
+import Control.Arrow
 
 {- Challenge 1 -}
 input = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
@@ -223,9 +229,44 @@ aesEcbDecrypt :: String -> String -> String
 aesEcbDecrypt key ciphertext = Char8.unpack plaintext
   where keyBytes = Char8.pack key
         cipher = throwCryptoError $ cipherInit keyBytes :: AES128
-        plaintext = ecbDecrypt cipher $ Base64.decodeLenient $  Char8.concat $ Char8.lines $ Char8.pack ciphertext
+        plaintext = ecbDecrypt cipher $ Base64.decodeLenient $ Char8.pack ciphertext
 
 challenge7 :: IO (String)
 challenge7 = do
   contents <- Prelude.readFile "data/7.txt"
   return (aesEcbDecrypt "YELLOW SUBMARINE" contents)
+
+{- Challenge 8: Detect AES in ECB Mode -}
+-- Elegant solution from: https://github.com/sw1sh/Matasano/blob/master/Set1.hs
+
+-- Break into blocks
+breakInto :: [a] -> Int -> [[a]]
+breakInto [] _ = []
+breakInto xs n = Data.List.take n xs : breakInto (Data.List.drop n xs) n
+
+fromHex :: String -> [Int]
+fromHex s = let (next, rest) = Data.List.splitAt 2 s -- get only 2 chars in x, rest in y ;; Data.List.splitAt 2 "Hello" => ("He","llo")
+                (hex,_):_ = readHex next  -- readHex on those 2 characters, making an integer ;; readHex "ab" [(171,"")]
+            in hex:if rest == [] then [] else fromHex rest
+
+challenge8 = Prelude.readFile "data/8.txt" >>=
+  return
+  . Data.List.map snd
+  . Data.List.filter fst
+  . Data.List.map (Data.List.any (>1)
+  . Data.List.map Data.List.length
+  . Data.List.group
+  . Data.List.sort
+  . (`breakInto`16) . fromHex &&& id) -- &&& is an Arrow function
+  . Prelude.lines
+{-
+challenge8 :: IO [Bool]
+challenge8 = do
+  file <- Prelude.readFile "data/8.txt"
+  let decoded = H.decode $ Char8.pack file
+  let ciphertext = Prelude.map (\x -> fst $ H.decode $ Char8.pack x) (Prelude.lines file)
+  let cipherChunks = breakInto ciphertext 16
+  let groups = ((Data.List.group . Data.List.sort) cipherChunks)
+  let counted = (Data.List.map Data.List.length groups)
+  return (Data.List.map (Char8.any (> 1)) groups)
+-}

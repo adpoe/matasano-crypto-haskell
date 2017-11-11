@@ -31,4 +31,5 @@ executable crypto
                        hspec,
                        Crypto,
                        cryptonite,
-                       memory
+                       memory,
+                       split
