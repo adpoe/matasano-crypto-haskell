@@ -32,4 +32,5 @@ executable crypto
                        Crypto,
                        cryptonite,
                        memory,
-                       split
+                       split,
+                       lens
