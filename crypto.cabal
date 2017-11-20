@@ -30,7 +30,9 @@ executable crypto
                        tasty-hunit,
                        hspec,
                        Crypto,
-                       cryptonite,
                        memory,
                        split,
-                       lens
+                       lens,
+                       cryptocipher,
+                       cryptonite,
+                       cipher-aes
